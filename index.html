@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Magical Word Search</title>
     <style>
         * {
@@ -10,6 +10,7 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Comic Sans MS', cursive, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -17,12 +18,13 @@
             min-height: 100vh;
             overflow-x: hidden;
             position: relative;
+            touch-action: manipulation;
         }
 
         .container {
             max-width: 900px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 15px;
             text-align: center;
             position: relative;
             z-index: 10;
@@ -30,85 +32,94 @@
 
         h1 {
             color: #ff6b9d;
-            font-size: 3rem;
+            font-size: clamp(1.8rem, 5vw, 3rem);
             margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            word-wrap: break-word;
         }
 
         .subtitle {
             color: #7a6fff;
-            font-size: 1.5rem;
-            margin-bottom: 30px;
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            margin-bottom: 20px;
+            padding: 0 10px;
+            line-height: 1.4;
         }
 
         .word-input-section {
-            background-color: rgba(255, 255, 255, 0.7);
+            background-color: rgba(255, 255, 255, 0.9);
             border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
+            padding: 15px;
+            margin-bottom: 15px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
         .word-input-container {
-            display: flex;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             gap: 10px;
-            justify-content: center;
             margin-bottom: 15px;
         }
 
         .word-input {
-            flex: 1 0 150px;
-            padding: 10px;
+            width: 100%;
+            padding: 12px;
             border: 2px solid #c9e9ff;
             border-radius: 8px;
             font-size: 1rem;
             text-align: center;
             text-transform: uppercase;
+            background: white;
         }
 
         button {
             background-color: #7a6fff;
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 14px 20px;
             border-radius: 50px;
-            font-size: 1.1rem;
+            font-size: 1rem;
             cursor: pointer;
-            margin: 0 10px;
+            margin: 5px;
             transition: all 0.3s ease;
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            min-height: 48px;
+            min-width: 120px;
+            touch-action: manipulation;
         }
 
-        button:hover {
+        button:hover, button:active {
             background-color: #5a4fff;
-            transform: translateY(-3px);
+            transform: translateY(-2px);
         }
 
         .game-info {
-            background-color: rgba(255, 255, 255, 0.7);
+            background-color: rgba(255, 255, 255, 0.9);
             border-radius: 15px;
             padding: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
         }
 
         .word-list {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 15px;
-            margin-bottom: 30px;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 0 10px;
         }
 
         .word-item {
-            background-color: rgba(255, 255, 255, 0.8);
-            padding: 10px 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 10px 15px;
             border-radius: 50px;
-            font-size: 1.2rem;
+            font-size: clamp(0.9rem, 2.5vw, 1.2rem);
             color: #5a5a5a;
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
+            white-space: nowrap;
         }
 
         .word-item.completed {
@@ -118,33 +129,42 @@
             transform: scale(1.05);
         }
 
+        .puzzle-container {
+            width: 100%;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            padding: 10px;
+            -webkit-overflow-scrolling: touch;
+        }
+
         .puzzle-grid {
             display: grid;
             grid-template-columns: repeat(10, 1fr);
-            gap: 5px;
-            margin: 0 auto 30px;
-            max-width: 500px;
-            background-color: rgba(255, 255, 255, 0.7);
-            padding: 15px;
+            gap: 4px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 12px;
             border-radius: 15px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            min-width: 320px;
         }
 
         .cell {
-            width: 40px;
-            height: 40px;
+            width: clamp(28px, 7vw, 40px);
+            height: clamp(28px, 7vw, 40px);
             background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 8px;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
+            font-size: clamp(0.9rem, 3vw, 1.2rem);
             font-weight: bold;
             color: #5a5a5a;
             cursor: pointer;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             transition: all 0.2s ease;
             user-select: none;
+            touch-action: manipulation;
         }
 
         .cell.selected {
@@ -159,6 +179,11 @@
 
         .controls {
             margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            padding: 0 10px;
         }
 
         .message {
@@ -166,23 +191,25 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: rgba(255, 255, 255, 0.95);
-            padding: 20px 40px;
+            background-color: rgba(255, 255, 255, 0.98);
+            padding: 20px 30px;
             border-radius: 15px;
-            font-size: 1.5rem;
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
             color: #ff6b9d;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
             z-index: 100;
             display: none;
             text-align: center;
+            max-width: 90%;
+            word-wrap: break-word;
         }
 
-        /* Character Styles */
+        /* Character Styles - Hide on mobile for performance */
         .dinosaur {
             position: absolute;
             bottom: 0;
-            width: 80px;
-            height: 60px;
+            width: 60px;
+            height: 45px;
             z-index: 1;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M30,70 Q50,30 70,70" stroke="%23a8e6cf" stroke-width="8" fill="none"/><circle cx="35" cy="65" r="5" fill="%23a8e6cf"/><circle cx="65" cy="65" r="5" fill="%23a8e6cf"/><path d="M20,50 Q30,40 40,50" stroke="%23a8e6cf" stroke-width="6" fill="none"/><path d="M60,50 Q70,40 80,50" stroke="%23a8e6cf" stroke-width="6" fill="none"/></svg>');
             background-repeat: no-repeat;
@@ -191,8 +218,8 @@
 
         .dragon {
             position: absolute;
-            width: 100px;
-            height: 80px;
+            width: 80px;
+            height: 60px;
             z-index: 1;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M30,50 Q50,20 70,50 Q50,80 30,50" fill="%23ff9aa2"/><path d="M70,50 Q80,30 90,50" stroke="%23ff9aa2" stroke-width="6" fill="none"/><path d="M70,50 Q75,40 80,50" stroke="%23ff9aa2" stroke-width="4" fill="none"/><circle cx="40" cy="45" r="3" fill="%23000"/><circle cx="60" cy="45" r="3" fill="%23000"/></svg>');
             background-repeat: no-repeat;
@@ -201,8 +228,8 @@
 
         .fairy {
             position: absolute;
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             z-index: 5;
             transition: all 1s ease;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="40" r="20" fill="%23fff" stroke="%23ffd700" stroke-width="2"/><path d="M30,40 Q50,60 70,40" fill="%23ffd700"/><path d="M50,20 L30,10" stroke="%23ffd700" stroke-width="4" fill="none"/><path d="M50,20 L70,10" stroke="%23ffd700" stroke-width="4" fill="none"/><path d="M50,60 L30,70" stroke="%23ffd700" stroke-width="4" fill="none"/><path d="M50,60 L70,70" stroke="%23ffd700" stroke-width="4" fill="none"/></svg>');
@@ -237,30 +264,124 @@
             100% { transform: translateX(calc(100vw + 100px)) translateY(0); }
         }
 
-        /* Responsive adjustments */
+        /* Mobile-specific adjustments */
         @media (max-width: 768px) {
-            .puzzle-grid {
-                grid-template-columns: repeat(10, 1fr);
-                max-width: 400px;
+            .container {
+                padding: 10px;
             }
             
-            .cell {
-                width: 35px;
-                height: 35px;
-                font-size: 1rem;
-            }
-            
-            h1 {
-                font-size: 2.5rem;
+            .word-input-container {
+                grid-template-columns: 1fr;
             }
             
             .word-input {
-                flex: 1 0 120px;
+                font-size: 1.1rem;
+                padding: 14px;
             }
+            
+            .puzzle-grid {
+                gap: 3px;
+                padding: 10px;
+            }
+            
+            .cell {
+                width: 32px;
+                height: 32px;
+            }
+            
+            button {
+                padding: 12px 16px;
+                font-size: 0.95rem;
+                min-width: 110px;
+                flex: 1;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .controls button {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            /* Hide decorative elements on mobile for better performance */
+            .dinosaur, .dragon, .fairy {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.6rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .word-item {
+                font-size: 0.9rem;
+                padding: 8px 12px;
+            }
+            
+            .puzzle-grid {
+                min-width: 300px;
+            }
+            
+            .cell {
+                width: 28px;
+                height: 28px;
+                font-size: 0.9rem;
+            }
+            
+            .game-info {
+                font-size: 0.85rem;
+                padding: 12px;
+            }
+            
+            button {
+                min-width: 100px;
+                padding: 10px 14px;
+            }
+        }
+
+        /* Landscape mode adjustments */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .container {
+                padding: 5px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+                margin-bottom: 5px;
+            }
+            
+            .subtitle {
+                margin-bottom: 10px;
+                font-size: 0.9rem;
+            }
+            
+            .word-list {
+                margin-bottom: 10px;
+            }
+            
+            .puzzle-container {
+                margin-bottom: 10px;
+            }
+        }
+
+        /* Prevent text selection */
+        .no-select {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
     </style>
 </head>
-<body>
+<body class="no-select">
     <div class="container">
         <h1>Magical Word Search</h1>
         <p class="subtitle">Spelling Test Study Guide by Titan Business Pros LLC!</p>
@@ -268,23 +389,23 @@
         <div class="word-input-section" id="wordInputSection">
             <h2>Enter Your 10 Words</h2>
             <div class="word-input-container">
-                <input type="text" class="word-input" placeholder="Word 1" maxlength="10">
-                <input type="text" class="word-input" placeholder="Word 2" maxlength="10">
-                <input type="text" class="word-input" placeholder="Word 3" maxlength="10">
-                <input type="text" class="word-input" placeholder="Word 4" maxlength="10">
-                <input type="text" class="word-input" placeholder="Word 5" maxlength="10">
-                <input type="text" class="word-input" placeholder="Word 6" maxlength="10">
-                <input type="text" class="word-input" placeholder="Word 7" maxlength="10">
-                <input type="text" class="word-input" placeholder="Word 8" maxlength="10">
-                <input type="text" class="word-input" placeholder="Word 9" maxlength="10">
-                <input type="text" class="word-input" placeholder="Word 10" maxlength="10">
+                <input type="text" class="word-input" placeholder="Word 1" maxlength="10" inputmode="text">
+                <input type="text" class="word-input" placeholder="Word 2" maxlength="10" inputmode="text">
+                <input type="text" class="word-input" placeholder="Word 3" maxlength="10" inputmode="text">
+                <input type="text" class="word-input" placeholder="Word 4" maxlength="10" inputmode="text">
+                <input type="text" class="word-input" placeholder="Word 5" maxlength="10" inputmode="text">
+                <input type="text" class="word-input" placeholder="Word 6" maxlength="10" inputmode="text">
+                <input type="text" class="word-input" placeholder="Word 7" maxlength="10" inputmode="text">
+                <input type="text" class="word-input" placeholder="Word 8" maxlength="10" inputmode="text">
+                <input type="text" class="word-input" placeholder="Word 9" maxlength="10" inputmode="text">
+                <input type="text" class="word-input" placeholder="Word 10" maxlength="10" inputmode="text">
             </div>
             <button id="generateBtn">Generate Puzzle</button>
         </div>
         
         <div class="game-area" id="gameArea" style="display: none;">
             <div class="game-info">
-                <p>Click and drag to select letters. Find all 10 words to win!</p>
+                <p>Touch and drag to select letters. Find all 10 words to win!</p>
                 <p><strong>Words are placed horizontally or vertically only.</strong></p>
             </div>
             
@@ -292,8 +413,10 @@
                 <!-- Word list will be populated by JavaScript -->
             </div>
             
-            <div class="puzzle-grid" id="puzzleGrid">
-                <!-- Puzzle grid will be populated by JavaScript -->
+            <div class="puzzle-container">
+                <div class="puzzle-grid" id="puzzleGrid">
+                    <!-- Puzzle grid will be populated by JavaScript -->
+                </div>
             </div>
             
             <div class="controls">
@@ -322,7 +445,9 @@
             foundWords: [],
             grid: [],
             isSelecting: false,
-            words: []
+            words: [],
+            touchStartX: 0,
+            touchStartY: 0
         };
 
         // DOM elements
@@ -340,7 +465,12 @@
         // Initialize the game
         function initGame() {
             setupEventListeners();
-            addCharactersToBackground();
+            // Hide decorative elements on mobile for better performance
+            if (window.innerWidth <= 768) {
+                addCharactersToBackground = function() {}; // Empty function on mobile
+            } else {
+                addCharactersToBackground();
+            }
         }
 
         // Generate puzzle from user words
@@ -382,6 +512,11 @@
             placeWordsInGrid();
             fillEmptyCells();
             renderPuzzleGrid();
+            
+            // Scroll to game area on mobile
+            if (window.innerWidth <= 768) {
+                gameArea.scrollIntoView({ behavior: 'smooth' });
+            }
         }
 
         // Create the word list display
@@ -565,15 +700,15 @@
             // Generate puzzle button
             generateBtn.addEventListener('click', generatePuzzle);
             
-            // Cell selection
-            puzzleGrid.addEventListener('mousedown', startSelection);
-            puzzleGrid.addEventListener('mouseover', continueSelection);
-            document.addEventListener('mouseup', endSelection);
+            // Cell selection for mouse
+            puzzleGrid.addEventListener('mousedown', handleMouseStart);
+            puzzleGrid.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleSelectionEnd);
             
             // Touch events for mobile
-            puzzleGrid.addEventListener('touchstart', startSelection);
-            puzzleGrid.addEventListener('touchmove', continueSelection);
-            document.addEventListener('touchend', endSelection);
+            puzzleGrid.addEventListener('touchstart', handleTouchStart, { passive: false });
+            puzzleGrid.addEventListener('touchmove', handleTouchMove, { passive: false });
+            document.addEventListener('touchend', handleSelectionEnd);
             
             // Buttons
             resetBtn.addEventListener('click', resetGame);
@@ -588,39 +723,74 @@
                     }
                 });
             });
+            
+            // Prevent context menu on long press
+            puzzleGrid.addEventListener('contextmenu', (e) => e.preventDefault());
         }
 
         // Show input section for new puzzle
         function showInputSection() {
             gameArea.style.display = 'none';
             wordInputSection.style.display = 'block';
+            
+            // Scroll to top on mobile
+            if (window.innerWidth <= 768) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
         }
 
-        // Start cell selection
-        function startSelection(e) {
+        // Handle mouse start
+        function handleMouseStart(e) {
             e.preventDefault();
             gameState.isSelecting = true;
             gameState.selectedCells = [];
             
-            const cell = getCellFromEvent(e);
+            const cell = getCellFromMouse(e);
             if (cell) {
                 selectCell(cell);
             }
         }
 
-        // Continue cell selection
-        function continueSelection(e) {
+        // Handle mouse move
+        function handleMouseMove(e) {
             if (!gameState.isSelecting) return;
             e.preventDefault();
             
-            const cell = getCellFromEvent(e);
+            const cell = getCellFromMouse(e);
             if (cell && !isCellSelected(cell)) {
                 selectCell(cell);
             }
         }
 
-        // End cell selection and check word
-        function endSelection() {
+        // Handle touch start
+        function handleTouchStart(e) {
+            e.preventDefault();
+            gameState.isSelecting = true;
+            gameState.selectedCells = [];
+            
+            const touch = e.touches[0];
+            gameState.touchStartX = touch.clientX;
+            gameState.touchStartY = touch.clientY;
+            
+            const cell = getCellFromTouch(e);
+            if (cell) {
+                selectCell(cell);
+            }
+        }
+
+        // Handle touch move
+        function handleTouchMove(e) {
+            if (!gameState.isSelecting) return;
+            e.preventDefault();
+            
+            const cell = getCellFromTouch(e);
+            if (cell && !isCellSelected(cell)) {
+                selectCell(cell);
+            }
+        }
+
+        // End selection and check word
+        function handleSelectionEnd() {
             if (!gameState.isSelecting) return;
             gameState.isSelecting = false;
             
@@ -639,26 +809,28 @@
             gameState.selectedCells = [];
         }
 
-        // Get cell from mouse/touch event
-        function getCellFromEvent(e) {
-            let clientX, clientY;
-            
-            if (e.type.includes('touch')) {
-                clientX = e.touches[0].clientX;
-                clientY = e.touches[0].clientY;
-            } else {
-                clientX = e.clientX;
-                clientY = e.clientY;
-            }
-            
-            const element = document.elementFromPoint(clientX, clientY);
+        // Get cell from mouse event
+        function getCellFromMouse(e) {
+            const element = document.elementFromPoint(e.clientX, e.clientY);
             if (element && element.classList.contains('cell')) {
                 return {
                     row: parseInt(element.dataset.row),
                     col: parseInt(element.dataset.col)
                 };
             }
-            
+            return null;
+        }
+
+        // Get cell from touch event
+        function getCellFromTouch(e) {
+            const touch = e.touches[0];
+            const element = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (element && element.classList.contains('cell')) {
+                return {
+                    row: parseInt(element.dataset.row),
+                    col: parseInt(element.dataset.col)
+                };
+            }
             return null;
         }
 
@@ -729,20 +901,22 @@
         function celebrateWordFound(word) {
             const fairy = document.getElementById('fairy');
             
-            // Move fairy to a random position
-            fairy.style.top = `${Math.random() * 70 + 15}%`;
-            fairy.style.left = `${Math.random() * 70 + 15}%`;
-            
-            // Add celebration animation
-            fairy.classList.add('celebrate');
+            if (fairy && window.innerWidth > 768) {
+                // Move fairy to a random position
+                fairy.style.top = `${Math.random() * 70 + 15}%`;
+                fairy.style.left = `${Math.random() * 70 + 15}%`;
+                
+                // Add celebration animation
+                fairy.classList.add('celebrate');
+                
+                // Remove animation after it completes
+                setTimeout(() => {
+                    fairy.classList.remove('celebrate');
+                }, 2000);
+            }
             
             // Show congratulatory message
             showMessage(`Great job! You found "${word}"!`);
-            
-            // Remove animation after it completes
-            setTimeout(() => {
-                fairy.classList.remove('celebrate');
-            }, 2000);
         }
 
         // Show a message
@@ -778,6 +952,8 @@
             
             // Re-render grid
             renderPuzzleGrid();
+            
+            showMessage("Game reset! Find all words again!");
         }
 
         // Provide a hint
@@ -794,6 +970,14 @@
 
         // Initialize the game when the page loads
         window.addEventListener('DOMContentLoaded', initGame);
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            // Re-render grid on resize to maintain proper sizing
+            if (gameState.grid.length > 0) {
+                renderPuzzleGrid();
+            }
+        });
     </script>
 </body>
 </html>
